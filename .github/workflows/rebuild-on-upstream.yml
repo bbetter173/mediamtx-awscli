@@ -16,9 +16,6 @@ on:
 jobs:
   check-and-build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        variant: ['', '-ffmpeg']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -68,17 +65,17 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/mediamtx:${{ steps.get_tag.outputs.tag }}${{ matrix.variant }}
+          tags: ghcr.io/${{ github.repository_owner }}/mediamtx:${{ steps.get_tag.outputs.tag }}-ffmpeg
           build-args: |
-            VERSION_TAG=${{ steps.get_tag.outputs.tag }}${{ matrix.variant }}
+            VERSION_TAG=${{ steps.get_tag.outputs.tag }}-ffmpeg
           platforms: linux/amd64,linux/arm64
 
       - name: Update last built tag
-        if: steps.compare.outputs.new_tag == 'true' && matrix.variant == ''
+        if: steps.compare.outputs.new_tag == 'true'
         run: echo "${{ steps.get_tag.outputs.tag }}" > .last_built_tag
 
       - name: Commit and push .last_built_tag
-        if: steps.compare.outputs.new_tag == 'true' && matrix.variant == ''
+        if: steps.compare.outputs.new_tag == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update last built tag
